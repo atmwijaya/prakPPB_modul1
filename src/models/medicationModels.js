@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabaseClient.js";
+
 export const MedicationModel = {
   async getAll() {
     const { data, error } = await supabase
@@ -9,6 +10,34 @@ export const MedicationModel = {
     if (error) throw error;
     return data;
   },
+
+  async getAllWithPagination(name, page, limit) {
+    let query = supabase
+      .from("medications")
+      .select(
+        "id, sku, name, description, price, quantity, category_id, supplier_id",
+        { count: "exact" }
+      );
+
+    // Add search filter if name is provided
+    if (name) {
+      query = query.ilike("name", `%${name}%`);
+    }
+
+    // Add pagination
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    query = query.range(from, to);
+
+    const { data, error, count } = await query;
+    if (error) throw error;
+
+    return {
+      medications: data,
+      totalCount: count
+    };
+  },
+
   async getById(id) {
     const { data, error } = await supabase
       .from("medications")
@@ -24,7 +53,17 @@ suppliers ( id, name, email, phone ),
     if (error) throw error;
     return data;
   },
+
   async create(payload) {
+    // Validate quantity and price
+    if (payload.quantity !== undefined && payload.quantity < 0) {
+      throw new Error("Quantity cannot be less than 0");
+    }
+    
+    if (payload.price !== undefined && payload.price < 0) {
+      throw new Error("Price cannot be less than 0");
+    }
+
     const { data, error } = await supabase
       .from("medications")
       .insert([payload])
@@ -32,7 +71,17 @@ suppliers ( id, name, email, phone ),
     if (error) throw error;
     return data[0];
   },
+
   async update(id, payload) {
+    // Validate quantity and price
+    if (payload.quantity !== undefined && payload.quantity < 0) {
+      throw new Error("Quantity cannot be less than 0");
+    }
+    
+    if (payload.price !== undefined && payload.price < 0) {
+      throw new Error("Price cannot be less than 0");
+    }
+
     const { data, error } = await supabase
       .from("medications")
       .update(payload)
@@ -41,9 +90,18 @@ suppliers ( id, name, email, phone ),
     if (error) throw error;
     return data[0];
   },
+
   async remove(id) {
     const { error } = await supabase.from("medications").delete().eq("id", id);
     if (error) throw error;
     return { success: true };
   },
+
+  async getTotalCount() {
+    const { count, error } = await supabase
+      .from("medications")
+      .select("*", { count: "exact", head: true });
+    if (error) throw error;
+    return count;
+  }
 };
