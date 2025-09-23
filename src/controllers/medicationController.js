@@ -11,17 +11,19 @@ export const MedicationController = {
         return res.status(400).json({ error: "Page and limit must be positive integers." });
       }
       const result = await MedicationModel.getAllWithPagination(name, pageNum, limitNum);
+      const totalPages = result.totalCount > 0 ? Math.ceil(result.totalCount / limitNum) : 0;
 
       res.json({
-        data: result.data,
+        data: result.medications,
         pagination: {
           currentPage: pageNum,
-          totalPages: Math.ceil(result.total / limitNum),
-          totalItems: result.total,
+          totalPages: totalPages,
+          totalItems: result.totalCount,
           itemsPerPage: limitNum
         }
       });
     } catch (err) {
+      console.error("GetAll Error:", err);
       res.status(500).json({ error: err.message });
     }
   },
