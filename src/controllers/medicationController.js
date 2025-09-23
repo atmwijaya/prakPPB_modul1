@@ -40,11 +40,11 @@ export const MedicationController = {
     try {
       const { quantity, price } = req.body;
       if (quantity !== undefined && quantity < 0) {
-        return res.status(400).json({ error: "Quantity cannot be negative." });
+        return res.status(400).json({ error: "Kuantitas tidak boleh negatif." });
       };
 
       if (price !== undefined && price < 0) {
-        return res.status(400).json({ error: "Price cannot be negative." });
+        return res.status(400).json({ error: "Harga tidak boleh negatif." });
       };
 
       const med = await MedicationModel.create(req.body);
