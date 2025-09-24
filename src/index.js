@@ -15,7 +15,7 @@ app.use(express.json());
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/medications", medicationRoutes);
-app.use("/api/report", reportRoutes);
+app.use("/api/reports", reportRoutes);
 
 const port = process.env.PORT || 3000;
 
